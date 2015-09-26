@@ -1,3 +1,5 @@
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 
@@ -11,7 +13,7 @@ import java.security.cert.X509Certificate;
 import static java.time.LocalDate.now;
 
 public class Demo {
-  public static void main(String[] args) throws GeneralSecurityException, IOException, OperatorCreationException {
+  public static void main(String[] args) throws GeneralSecurityException, IOException, OperatorCreationException, CMSException {
     Security.addProvider(new BouncyCastleProvider());
 
     Crypto crypto = new RSACrypto();
@@ -24,5 +26,8 @@ public class Demo {
 
     byte[] signature = crypto.sign("hello", subject.getPrivate());
     System.out.println(signature.length);
+
+    CMSSignedData cades = crypto.signCades("hello", subject.getPrivate(), subjectCert);
+    System.out.println(cades.getEncoded().length);
   }
 }

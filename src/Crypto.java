@@ -1,11 +1,18 @@
 import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.CMSSignedDataGenerator;
+import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
@@ -15,6 +22,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -54,6 +62,14 @@ public abstract class Crypto {
     ContentSigner signer = getContentSigner(key);
     signer.getOutputStream().write(data.getBytes());
     return signer.getSignature();
+  }
+
+  public CMSSignedData signCades(String data, PrivateKey privateKey, X509Certificate certificate) throws CertificateEncodingException, OperatorCreationException, CMSException {
+    CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+    gen.addCertificate(new JcaX509CertificateHolder(certificate));
+    gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().build())
+        .build(getContentSigner(privateKey), certificate));
+    return gen.generate(new CMSProcessableByteArray("hello".getBytes()), true);
   }
 
   private Date toDate(LocalDate date) {
