@@ -24,9 +24,9 @@ public abstract class Crypto {
   String dnSuffix = "OU=DevClub, O=Codeborne, C=EE";
   JcaX509CertificateConverter jcaConverter = new JcaX509CertificateConverter();
 
-  public abstract KeyPair generateKeyPair() throws GeneralSecurityException;
+  protected abstract KeyPair generateKeyPair() throws GeneralSecurityException;
 
-  public abstract ContentSigner getContentSigner(PrivateKey privateKey) throws OperatorCreationException;
+  protected abstract ContentSigner getContentSigner(PrivateKey privateKey) throws OperatorCreationException;
 
   protected X509Certificate issueSelfSignedCert(KeyPair keyPair, String cn, LocalDate expiresAt) throws GeneralSecurityException, IOException, OperatorCreationException {
     return issueCert(keyPair.getPublic(), keyPair, cn, BigInteger.ONE, expiresAt);
@@ -48,6 +48,12 @@ public abstract class Crypto {
 
     X509CertificateHolder holder = certGen.build(getContentSigner(issuer.getPrivate()));
     return jcaConverter.getCertificate(holder);
+  }
+
+  public byte[] sign(String data, PrivateKey key) throws OperatorCreationException, IOException {
+    ContentSigner signer = getContentSigner(key);
+    signer.getOutputStream().write(data.getBytes());
+    return signer.getSignature();
   }
 
   private Date toDate(LocalDate date) {

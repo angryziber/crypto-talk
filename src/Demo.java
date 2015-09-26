@@ -10,16 +10,19 @@ import java.security.cert.X509Certificate;
 
 import static java.time.LocalDate.now;
 
-public class BasicSignatures {
+public class Demo {
   public static void main(String[] args) throws GeneralSecurityException, IOException, OperatorCreationException {
     Security.addProvider(new BouncyCastleProvider());
 
-    Crypto crypto = new GOSTCrypto();
+    Crypto crypto = new RSACrypto();
     KeyPair root = crypto.generateKeyPair();
     X509Certificate rootCert = crypto.issueSelfSignedCert(root, "Root", now().plusYears(5));
 
     KeyPair subject = crypto.generateKeyPair();
     X509Certificate subjectCert = crypto.issueCert(subject.getPublic(), root, "Anton Keks", BigInteger.ONE, now().plusYears(1));
     System.out.println(subjectCert);
+
+    byte[] signature = crypto.sign("hello", subject.getPrivate());
+    System.out.println(signature.length);
   }
 }
