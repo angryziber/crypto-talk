@@ -21,7 +21,7 @@ public class Demo {
     X509Certificate rootCert = crypto.issueSelfSignedCert(root, "Root", now().plusYears(5));
 
     KeyPair subject = crypto.generateKeyPair();
-    X509Certificate subjectCert = crypto.issueCert(subject.getPublic(), root, "Anton Keks", BigInteger.ONE, now().plusYears(1));
+    X509Certificate subjectCert = crypto.issueCert(root, rootCert, subject.getPublic(), "Anton Keks", BigInteger.ONE, now().plusYears(1));
     System.out.println(subjectCert);
 
     byte[] signature = crypto.sign("hello", subject.getPrivate());

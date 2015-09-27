@@ -37,13 +37,14 @@ public abstract class Crypto {
   protected abstract ContentSigner getContentSigner(PrivateKey privateKey) throws OperatorCreationException;
 
   protected X509Certificate issueSelfSignedCert(KeyPair keyPair, String cn, LocalDate expiresAt) throws GeneralSecurityException, IOException, OperatorCreationException {
-    return issueCert(keyPair.getPublic(), keyPair, cn, BigInteger.ONE, expiresAt);
+    return issueCert(keyPair, null, keyPair.getPublic(), cn, BigInteger.ONE, expiresAt);
   }
 
-  protected X509Certificate issueCert(PublicKey subject, KeyPair issuer, String cn, BigInteger serial, LocalDate expiresAt) throws GeneralSecurityException, IOException, OperatorCreationException {
+  protected X509Certificate issueCert(KeyPair issuer, X509Certificate issuerCert, PublicKey subject, String cn, BigInteger serial, LocalDate expiresAt) throws GeneralSecurityException, IOException, OperatorCreationException {
     String subjectDn = "CN=" + cn + ", " + dnSuffix;
+    String issuerDn = issuerCert != null ? issuerCert.getSubjectDN().toString() : subjectDn;
 
-    JcaX509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(new X500Principal(subjectDn),
+    JcaX509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(new X500Principal(issuerDn),
         serial, new Date(), toDate(expiresAt), new X500Principal(subjectDn), subject);
 
     JcaX509ExtensionUtils x509Utils = new JcaX509ExtensionUtils();
