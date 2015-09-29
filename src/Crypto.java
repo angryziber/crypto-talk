@@ -70,7 +70,7 @@ public abstract class Crypto {
     gen.addCertificate(new JcaX509CertificateHolder(certificate));
     gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().build())
         .build(getContentSigner(privateKey), certificate));
-    return gen.generate(new CMSProcessableByteArray("hello".getBytes()), true);
+    return gen.generate(new CMSProcessableByteArray(data.getBytes()), true);
   }
 
   private Date toDate(LocalDate date) {
