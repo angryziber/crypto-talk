@@ -28,6 +28,14 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 
+import static org.bouncycastle.asn1.x509.Extension.*;
+import static org.bouncycastle.asn1.x509.KeyPurposeId.id_kp_OCSPSigning;
+import static org.bouncycastle.asn1.x509.KeyPurposeId.id_kp_codeSigning;
+import static org.bouncycastle.asn1.x509.KeyPurposeId.id_kp_timeStamping;
+import static org.bouncycastle.asn1.x509.KeyUsage.cRLSign;
+import static org.bouncycastle.asn1.x509.KeyUsage.digitalSignature;
+import static org.bouncycastle.asn1.x509.KeyUsage.keyCertSign;
+
 public abstract class Crypto {
   String dnSuffix = "OU=DevClub, O=Codeborne, C=EE";
   JcaX509CertificateConverter jcaConverter = new JcaX509CertificateConverter();
@@ -48,12 +56,11 @@ public abstract class Crypto {
         serial, new Date(), toDate(expiresAt), new X500Principal(subjectDn), subject);
 
     JcaX509ExtensionUtils x509Utils = new JcaX509ExtensionUtils();
-    certGen.addExtension(Extension.basicConstraints, true, new BasicConstraints(true));
-    certGen.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.cRLSign | KeyUsage.digitalSignature | KeyUsage.keyCertSign));
-    certGen.addExtension(Extension.extendedKeyUsage, true, new ExtendedKeyUsage(new KeyPurposeId[]{
-        KeyPurposeId.id_kp_OCSPSigning, KeyPurposeId.id_kp_timeStamping, KeyPurposeId.id_kp_codeSigning}));
-    certGen.addExtension(Extension.subjectKeyIdentifier, false, x509Utils.createSubjectKeyIdentifier(subject));
-    certGen.addExtension(Extension.authorityKeyIdentifier, false, x509Utils.createAuthorityKeyIdentifier(issuer.getPublic()));
+    certGen.addExtension(basicConstraints, true, new BasicConstraints(true));
+    certGen.addExtension(keyUsage, true, new KeyUsage(cRLSign | digitalSignature | keyCertSign));
+    certGen.addExtension(extendedKeyUsage, true, new ExtendedKeyUsage(new KeyPurposeId[]{id_kp_OCSPSigning, id_kp_timeStamping, id_kp_codeSigning}));
+    certGen.addExtension(subjectKeyIdentifier, false, x509Utils.createSubjectKeyIdentifier(subject));
+    certGen.addExtension(authorityKeyIdentifier, false, x509Utils.createAuthorityKeyIdentifier(issuer.getPublic()));
 
     X509CertificateHolder holder = certGen.build(getContentSigner(issuer.getPrivate()));
     return jcaConverter.getCertificate(holder);
