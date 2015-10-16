@@ -37,7 +37,7 @@ import static org.bouncycastle.asn1.x509.KeyUsage.digitalSignature;
 import static org.bouncycastle.asn1.x509.KeyUsage.keyCertSign;
 
 public abstract class Crypto {
-  String dnSuffix = "OU=DevClub, O=Codeborne, C=EE";
+  String dnSuffix = "OU=Joker, O=Codeborne, C=EE";
   JcaX509CertificateConverter jcaConverter = new JcaX509CertificateConverter();
 
   protected abstract KeyPair generateKeyPair() throws GeneralSecurityException;
